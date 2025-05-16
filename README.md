@@ -1,3 +1,6 @@
+**NOTE: This is fixed by
+https://github.com/dgryski/go-metro/commit/edb8663e5e333c4ed72515a1507a363e70ed92ce.**
+
 This is a reproduction of a segfault when runtime execution tracing is enabled.
 It reproduces fairly regularly for me on amd64. This reproduction uses the
 `github.com/dgryski/go-metro` library, which has an assembly implementation for
