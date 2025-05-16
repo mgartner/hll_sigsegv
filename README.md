@@ -1,7 +1,12 @@
-This is a reproduction of a SIGSEGV when runtime execution tracing is enabled.
-It uses the `github.com/axiomhq/hyperloglog` library.
+This is a reproduction of a segfault when runtime execution tracing is enabled.
+It reproduces fairly regularly for me on amd64. This reproduction uses the
+`github.com/dgryski/go-metro` library, which has an assembly implementation for
+amd64 - perhaps that is relevant.
 
-The SIGSEGV reproduces for me fairly regularly on amd64.
+At Cockroach Labs, we saw a few occurrences of this segfault in CockroachDB
+clusters, with stack traces related to our usage of
+`github.com/axiomhq/hyperloglog`, which relies on `go-metro`. I was able to
+create this minimized reproduction using just `go-metro`.
 
 ```
 go build . && ./hll_sigsegv

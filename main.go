@@ -2,9 +2,10 @@ package main
 
 import (
 	"crypto/rand"
-	"github.com/axiomhq/hyperloglog"
 	"runtime/trace"
 	"sync"
+	metro "github.com/dgryski/go-metro"
+
 )
 
 type void struct{}
@@ -36,13 +37,20 @@ func hll(wg *sync.WaitGroup) {
 		panic(err)
 	}
 
-	h := hyperloglog.New14()
+	var u uint64
 	for i := 0; i < 100_000_000; i++ {
 		// Allocate some memory. The SIGSEGV does not seem to reproduce without
 		// this.
 		alloc := make([]byte, 1000)
 		copy(alloc, buf)
-		h.Insert(buf)
+		u = hash(buf)
 	}
+	_ = u
 	wg.Done()
 }
+
+//go:noinline
+func hash(b []byte) uint64 {
+	return metro.Hash64(b, 1337)
+}
+
