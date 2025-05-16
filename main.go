@@ -10,6 +10,11 @@ import (
 	"sync"
 )
 
+const (
+	bufLen = 10_000
+	concurrency = 100
+)
+
 func main() {
 	f, err := os.Create("trace.out")
 	if err != nil {
@@ -17,20 +22,21 @@ func main() {
 	}
 	defer f.Close()
 
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go hll(&wg)
-	}
-
 	if err := trace.Start(f); err != nil {
 		panic(err)
 	}
 	defer trace.Stop()
 
+	var wg sync.WaitGroup
+	wg.Add(concurrency)
+	for i := 0; i < concurrency; i++ {
+		go hll(&wg)
+	}
+
 	wg.Wait()
 }
 
+//go:noinline
 func hll(wg *sync.WaitGroup) {
 	buf := make([]byte, 1000)
 	_, err := rand.Read(buf)
