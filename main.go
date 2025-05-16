@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"os"
 	"runtime/trace"
+	"sync"
 )
 
 func main() {
@@ -16,19 +17,29 @@ func main() {
 	}
 	defer f.Close()
 
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go hll(&wg)
+	}
+
 	if err := trace.Start(f); err != nil {
 		panic(err)
 	}
 	defer trace.Stop()
 
+	wg.Wait()
+}
+
+func hll(wg *sync.WaitGroup) {
 	buf := make([]byte, 1000)
-	_, err = rand.Read(buf)
+	_, err := rand.Read(buf)
 	if err != nil {
 		panic(err)
 	}
 
 	h := hyperloglog.New14()
-	for i := 0; i < 100_000_000; i++ {
+	for i := 0; i < 1_000_000; i++ {
 		start, err := rand.Int(rand.Reader, big.NewInt(500))
 		if err != nil {
 			panic(err)
@@ -40,4 +51,5 @@ func main() {
 		h.Insert(buf[start.Int64() : start.Int64()+end.Int64()])
 	}
 	fmt.Println(h.Estimate())
+	wg.Done()
 }
