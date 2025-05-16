@@ -2,37 +2,29 @@ package main
 
 import (
 	"crypto/rand"
-	"fmt"
 	"github.com/axiomhq/hyperloglog"
-	"math/big"
-	"os"
 	"runtime/trace"
 	"sync"
 )
 
-const (
-	bufLen = 10_000
-	concurrency = 100
-)
+type void struct{}
+
+func (v *void) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
 
 func main() {
-	f, err := os.Create("trace.out")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	if err := trace.Start(f); err != nil {
+	var v void
+	if err := trace.Start(&v); err != nil {
 		panic(err)
 	}
 	defer trace.Stop()
 
 	var wg sync.WaitGroup
-	wg.Add(concurrency)
-	for i := 0; i < concurrency; i++ {
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
 		go hll(&wg)
 	}
-
 	wg.Wait()
 }
 
@@ -45,17 +37,12 @@ func hll(wg *sync.WaitGroup) {
 	}
 
 	h := hyperloglog.New14()
-	for i := 0; i < 1_000_000; i++ {
-		start, err := rand.Int(rand.Reader, big.NewInt(500))
-		if err != nil {
-			panic(err)
-		}
-		end, err := rand.Int(rand.Reader, big.NewInt(500))
-		if err != nil {
-			panic(err)
-		}
-		h.Insert(buf[start.Int64() : start.Int64()+end.Int64()])
+	for i := 0; i < 100_000_000; i++ {
+		// Allocate some memory. The SIGSEGV does not seem to reproduce without
+		// this.
+		alloc := make([]byte, 1000)
+		copy(alloc, buf)
+		h.Insert(buf)
 	}
-	fmt.Println(h.Estimate())
 	wg.Done()
 }
