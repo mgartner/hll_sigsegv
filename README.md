@@ -76,7 +76,7 @@ Disassembly of section .text:
   47b973:       64 4c 8b 34 25 f8 ff    mov    %fs:0xfffffffffffffff8,%r14
   47b97a:       ff ff
   47b97c:       48 8b 44 24 20          mov    0x20(%rsp),%rax
-  47b981:       48 83 c4 28             add    $0x28,%rsp
+  <b>47b981:       48 83 c4 28             add    $0x28,%rsp</b>
   47b985:       5d                      pop    %rbp
   47b986:       c3                      retq
   47b987:       48 89 44 24 08          mov    %rax,0x8(%rsp)
