@@ -24,13 +24,13 @@ func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
-		go hll(&wg)
+		go run(&wg)
 	}
 	wg.Wait()
 }
 
 //go:noinline
-func hll(wg *sync.WaitGroup) {
+func run(wg *sync.WaitGroup) {
 	buf := make([]byte, 1000)
 	_, err := rand.Read(buf)
 	if err != nil {
